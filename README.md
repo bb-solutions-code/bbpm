@@ -2,7 +2,7 @@
 
 **BBScript Package Manager** — install block packages (such as [Foblox](https://github.com/bb-solutions-code/foblox)) into a project, then run `.bbs` graphs with `bbpm run` so package blocks are registered alongside built-in BBScript blocks.
 
-`bbpm` depends on **[bbscript](https://pypi.org/project/bbscript/)** (`>=0.2.0`); installing `bbpm` pulls in the runtime. **Foblox** is not bundled in the wheel; use `bbpm init` (default) or `bbpm fetch` to clone it from Git.
+`bbpm` depends on **[bbscript](https://github.com/bb-solutions-code/bbscript)** (`>=0.2.0`, [PyPI](https://pypi.org/project/bbscript/)); installing `bbpm` pulls in the runtime. **Foblox** is not bundled in the wheel; use `bbpm init` (default) or `bbpm fetch` to clone it from Git.
 
 ## Requirements
 
@@ -62,6 +62,18 @@ You can also run the CLI as a module: `python -m bbpm <command> ...`.
 ## Manifest
 
 `.bbpm/bbpm.json` (schema version `1`) lists packages with `name`, `source` (`git` with `url`/`ref` or `local` with `path`), and install path `packages/<name>`.
+
+## Related projects
+
+- **[bbscript](https://github.com/bb-solutions-code/bbscript)** — core graph runtime and `bbscript` CLI for `.bbs` documents; bbpm wraps it for `bbpm run`.
+- **[foblox](https://github.com/bb-solutions-code/foblox)** — default foundation-blocks package (e.g. `variable`, `calculate`, `say`) fetched by `bbpm init`.
+
+## Contributing
+
+1. Open a branch for your change.
+2. Use an editable install with **[bbscript](https://github.com/bb-solutions-code/bbscript)** available (see **Install**), then add or update tests under `tests/`.
+3. From the repository root, run `python -m pytest -q`.
+4. Keep CLI behavior, `.bbpm/bbpm.json` schema, and user-facing messages consistent with existing commands; prefer English for docs and help text.
 
 ## License
 
