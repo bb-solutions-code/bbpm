@@ -1,0 +1,33 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "bbpm"
+version = "0.1.0"
+description = "BBScript Package Manager — install and run block packages for BBScript projects."
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "Apache-2.0" }
+authors = [{ name = "Ultradeviant", email = "salimov29@gmail.com" }]
+keywords = ["bbscript", "package-manager", "blocks"]
+dependencies = [
+    "bbscript>=0.2.0",
+    "typer>=0.9.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=9.0.0",
+    "ruff>=0.1.0",
+]
+
+[project.scripts]
+bbpm = "bbpm.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["."]
+
+[tool.pytest.ini_options]
+python_files = ["test_*.py"]
+testpaths = ["tests"]
