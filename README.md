@@ -1,6 +1,6 @@
 # bbpm
 
-**BBScript Package Manager** — install block packages (such as [Foblox](https://github.com/bb-solutions-code/foblox)) into a project, then run `.bbs` graphs with `bbpm run` so package blocks are registered alongside built-in BBScript blocks.
+**BBScript Package Manager** — install block packages (such as [Foblox](https://github.com/bb-solutions-code/foblox)) into a project under `.bbpm/`. Run `.bbs` graphs with **`bbscript run`** (from [bbscript](https://github.com/bb-solutions-code/bbscript)) so package blocks register alongside built-in BBScript blocks.
 
 `bbpm` depends on **[bbscript](https://github.com/bb-solutions-code/bbscript)** (`>=0.2.0`, [PyPI](https://pypi.org/project/bbscript/)); installing `bbpm` pulls in the runtime. **Foblox** is not bundled in the wheel; use `bbpm init` (default) or `bbpm fetch` to clone it from Git.
 
@@ -8,6 +8,14 @@
 
 - Python 3.10+
 - **Git** on `PATH` when using `https://` or `git@` sources (for `git clone`)
+
+## Bundled Foblox (installers / env)
+
+Frozen bundles and installers may ship Foblox next to the executable; **`bbscript run`** loads it from the PyInstaller bundle or from **`BBSCRIPT_BUNDLED_PACKAGES`** (implemented in `bbscript.bundled`, no `bbpm` required). When `bbpm` is installed, `prepare_runtime` also loads packages from `.bbpm/`. For local testing without a project `.bbpm`, you can point to a package root:
+
+- `BBSCRIPT_BUNDLED_PACKAGES` — one or more directories (separator: `;` on Windows, `:` on Unix), each a BBScript package root containing a root `.bbpackage` manifest (same layout as Foblox).
+
+See [packaging/README.md](https://github.com/bb-solutions-code/bbscript/blob/main/packaging/README.md) in the **bbscript** repository for frozen installer / PyInstaller build instructions.
 
 ## Install
 
@@ -41,7 +49,7 @@ bbpm fetch ./my-local-package
 Run a script with all installed packages loaded:
 
 ```bash
-bbpm run workflow.bbs
+bbscript run workflow.bbs
 ```
 
 If `.bbpm` lives above the `.bbs` file, discovery walks parents from the script path; or pass `--path` to the project root.
@@ -55,7 +63,6 @@ If `.bbpm` lives above the `.bbs` file, discovery walks parents from the script 
 | `bbpm reset [--path DIR]` | Delete `.bbpm/packages/*`, keep `bbpm.json`, re-fetch every listed package |
 | `bbpm cleanup <name> [--path DIR]` | Remove one package from the manifest and from disk |
 | `bbpm list [--path DIR]` | List packages in the manifest |
-| `bbpm run <file.bbs> [--path DIR] ...` | Load builtins + packages, execute the document |
 
 You can also run the CLI as a module: `python -m bbpm <command> ...`.
 
@@ -65,7 +72,7 @@ You can also run the CLI as a module: `python -m bbpm <command> ...`.
 
 ## Related projects
 
-- **[bbscript](https://github.com/bb-solutions-code/bbscript)** — core graph runtime and `bbscript` CLI for `.bbs` documents; bbpm wraps it for `bbpm run`.
+- **[bbscript](https://github.com/bb-solutions-code/bbscript)** — core graph runtime and `bbscript` CLI (`bbscript run` executes `.bbs` with optional package loading when `bbpm` is installed).
 - **[foblox](https://github.com/bb-solutions-code/foblox)** — default foundation-blocks package (e.g. `variable`, `calculate`, `say`) fetched by `bbpm init`.
 
 ## Contributing

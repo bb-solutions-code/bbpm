@@ -1,46 +1,29 @@
-"""Discover and parse root `.bbpackage` manifests."""
+"""Discover and parse root `.bbpackage` manifests (delegates to bbscript, BBPMError for CLI)."""
 
 from __future__ import annotations
 
-import json
 from pathlib import Path
+
+from bbscript import bbpackage as _bp
+from bbscript.errors import PackageLoadError
 
 from .errors import BBPMError
 
 
+def _wrap(fn, *args, **kwargs):
+    try:
+        return fn(*args, **kwargs)
+    except PackageLoadError as e:
+        raise BBPMError(str(e)) from e
+
+
 def find_root_bbpackage_file(package_root: Path) -> Path:
-    """Root aggregate package: `*.bbpackage` in `package_root` with a `blocks` list."""
-    if not package_root.is_dir():
-        raise BBPMError(f"Not a directory: {package_root}")
-    candidates = sorted(package_root.glob("*.bbpackage"))
-    if not candidates:
-        raise BBPMError(f"No .bbpackage file found in {package_root}")
-    for c in candidates:
-        if c.parent != package_root:
-            continue
-        try:
-            data = json.loads(c.read_text(encoding="utf-8"))
-        except (json.JSONDecodeError, OSError) as e:
-            raise BBPMError(f"Invalid JSON in {c}: {e}") from e
-        if isinstance(data.get("blocks"), list):
-            return c
-    return candidates[0]
+    return _wrap(_bp.find_root_bbpackage_file, package_root)
 
 
 def read_root_manifest(package_root: Path) -> dict:
-    root_file = find_root_bbpackage_file(package_root)
-    try:
-        data = json.loads(root_file.read_text(encoding="utf-8"))
-    except json.JSONDecodeError as e:
-        raise BBPMError(f"Invalid JSON in {root_file}: {e}") from e
-    if not isinstance(data, dict):
-        raise BBPMError(f"{root_file} must contain a JSON object.")
-    return data
+    return _wrap(_bp.read_root_manifest, package_root)
 
 
 def read_package_name(package_root: Path) -> str:
-    data = read_root_manifest(package_root)
-    name = data.get("name")
-    if not isinstance(name, str) or not name.strip():
-        raise BBPMError(f"Root .bbpackage in {package_root} must define non-empty `name`.")
-    return name.strip()
+    return _wrap(_bp.read_package_name, package_root)

@@ -9,13 +9,10 @@ import typer
 from .errors import BBPMError
 from .fsutil import safe_rmtree
 from .fetch import fetch_git, fetch_local, reset_all, resolve_local_path
-from .load import prepare_runtime
 from .manifest import empty_manifest, read_manifest, write_manifest
-from .paths import DEFAULT_FOBLOX_GIT_URL, find_project_root, manifest_path
-from bbscript.core.loader import load_bbs_document
-from bbscript.core.runner import run_bbs_document
+from .paths import DEFAULT_FOBLOX_GIT_URL, manifest_path
 
-app = typer.Typer(help="BBScript Package Manager (bbpm).")
+app = typer.Typer(help="BBScript Package Manager (bbpm) — install and manage .bbpackage repos.")
 
 
 def _project_root(path: Path | None) -> Path:
@@ -138,49 +135,6 @@ def list_cmd(
     except BBPMError as e:
         typer.echo(str(e), err=True)
         raise typer.Exit(code=1) from e
-
-
-@app.command()
-def run(
-    bbs_path: Path = typer.Argument(..., help="Path to a .bbs file."),
-    path: Path = typer.Option(
-        None,
-        "--path",
-        help="BBScript project root containing .bbpm (default: discover from .bbs location).",
-    ),
-    execution_id: str = typer.Option(None, help="Optional execution id for events."),
-    max_workers: int = typer.Option(8, help="Max parallel worker threads."),
-) -> None:
-    """Run a `.bbs` document with built-in blocks and installed BBPM packages."""
-    bbs = bbs_path.resolve()
-    if not bbs.is_file():
-        typer.echo(f"File not found: {bbs}", err=True)
-        raise typer.Exit(code=1)
-
-    project_root: Path | None = None
-    if path is not None:
-        project_root = _project_root(path)
-    else:
-        project_root = find_project_root(bbs)
-
-    try:
-        prepare_runtime(project_root)
-    except BBPMError as e:
-        typer.echo(str(e), err=True)
-        raise typer.Exit(code=1) from e
-
-    doc = load_bbs_document(bbs)
-    result = run_bbs_document(doc, execution_id=execution_id, max_workers=max_workers)
-    typer.echo(f"execution_status: {result.state.status.value}")
-    if result.state.errors.get("__execution__"):
-        typer.echo(f"error: {result.state.errors['__execution__']}")
-    typer.echo("")
-    typer.echo("final_context:")
-    for k, v in result.context.items():
-        if isinstance(v, str) and len(v) > 300:
-            typer.echo(f"- {k}: {v[:300]}...")
-        else:
-            typer.echo(f"- {k}: {v}")
 
 
 def main() -> None:
